@@ -1,6 +1,4 @@
 import java.awt.*;
-import java.io.FileWriter;
-import java.io.IOException;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
@@ -13,24 +11,25 @@ public class HojaDePedidos extends JFrame {
         setTitle("Hoja de Pedidos - Clínica de Podología");
         setSize(600, 400);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
+        setLocationRelativeTo(null); // Centrar ventana
+        setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
 
         // Título
         JLabel lblTitulo = new JLabel("Hoja de Pedidos");
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 36));
         lblTitulo.setBorder(BorderFactory.createEmptyBorder(30, 0, 20, 0));
-        lblTitulo.setHorizontalAlignment(SwingConstants.CENTER);
-        
-        add(lblTitulo, BorderLayout.NORTH);
+        lblTitulo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        add(lblTitulo);
 
-        // Panel para introducir los datos del pedido
-        JPanel panelDatos = new JPanel();
-        panelDatos.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        // Panel de entrada de datos
+        JPanel panelDatos = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        panelDatos.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         txtMedicamento = new JTextField(10);
         txtViaAdmin = new JTextField(10);
         txtCantidad = new JTextField(5);
         JButton btnAgregar = new JButton("Agregar Pedido");
+        JButton btnDescargar = new JButton("Descargar Pedido");
 
         panelDatos.add(new JLabel("Medicamento:"));
         panelDatos.add(txtMedicamento);
@@ -39,31 +38,38 @@ public class HojaDePedidos extends JFrame {
         panelDatos.add(new JLabel("Cantidad:"));
         panelDatos.add(txtCantidad);
         panelDatos.add(btnAgregar);
+        add(panelDatos);
 
-        // Tabla para mostrar los pedidos
+        // Panel para el botón "Descargar Pedido"
+        JPanel panelDescargar = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        panelDescargar.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
+        panelDescargar.add(btnDescargar);
+        add(panelDescargar);
+
+        // Tabla de pedidos
         String[] columnNames = {"Medicamento", "Vía de Administración", "Cantidad"};
         modeloTabla = new DefaultTableModel(columnNames, 0);
         tablaPedidos = new JTable(modeloTabla);
+        tablaPedidos.setFillsViewportHeight(true);
 
-        // Panel de la tabla
-        JPanel panelTabla = new JPanel();
-        panelTabla.setLayout(new BorderLayout());
-        panelTabla.setBorder(BorderFactory.createEmptyBorder(50, 50, 10, 50));
+        JPanel panelTabla = new JPanel(new BorderLayout());
+        panelTabla.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         panelTabla.add(new JScrollPane(tablaPedidos), BorderLayout.CENTER);
+        add(panelTabla);
 
-        // Botón "Descargar Pedidos"
-        JButton btnDescargar = new JButton("Descargar Pedidos");
-        panelTabla.add(btnDescargar, BorderLayout.SOUTH);
+        // Panel del botón "Eliminar"
+        JPanel panelBotonEliminar = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JButton btnEliminar = new JButton("Eliminar Pedido");
+        btnEliminar.addActionListener(e -> eliminarPedido());
+        panelBotonEliminar.add(btnEliminar);
+        add(panelBotonEliminar);
 
-        // Agregar componentes a la ventana
-        add(panelDatos, BorderLayout.CENTER);
-        add(panelTabla, BorderLayout.SOUTH);
-
-        // Acción del botón "Agregar Pedido"
+        // Funcionalidades
         btnAgregar.addActionListener(e -> agregarPedido());
 
-        // Acción del botón "Descargar Pedidos"
-        btnDescargar.addActionListener(e -> descargarPedidos());
+        btnDescargar.addActionListener(e -> {
+            JOptionPane.showMessageDialog(this, "Funcionalidad para descargar pedidos no implementada.");
+        });
     }
 
     private void agregarPedido() {
@@ -87,23 +93,16 @@ public class HojaDePedidos extends JFrame {
         }
     }
 
-    private void descargarPedidos() {
-        try (FileWriter writer = new FileWriter("pedidos.txt")) {
-            for (int i = 0; i < modeloTabla.getRowCount(); i++) {
-                writer.write(modeloTabla.getValueAt(i, 0) + ", " +
-                             modeloTabla.getValueAt(i, 1) + ", " +
-                             modeloTabla.getValueAt(i, 2) + "\n");
-            }
-            JOptionPane.showMessageDialog(this, "Pedidos descargados exitosamente.");
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "Error al guardar los pedidos.");
+    private void eliminarPedido() {
+        int row = tablaPedidos.getSelectedRow();
+        if (row >= 0) {
+            modeloTabla.removeRow(row);
+        } else {
+            JOptionPane.showMessageDialog(this, "Por favor, seleccione un pedido para eliminar.");
         }
     }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new HojaDePedidos().setVisible(true));
-    }
 }
+
 
 
 
