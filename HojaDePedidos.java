@@ -1,6 +1,6 @@
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.io.FileWriter;
+import java.io.IOException;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
@@ -17,15 +17,15 @@ public class HojaDePedidos extends JFrame {
 
         // Título
         JLabel lblTitulo = new JLabel("Hoja de Pedidos");
-        lblTitulo.setFont(new Font("Arial", Font.BOLD, 36)); // Fuente grande y en negrita
-        lblTitulo.setBorder(BorderFactory.createEmptyBorder(30, 0, 20, 0)); // Margen superior e inferior
-        lblTitulo.setHorizontalAlignment(SwingConstants.CENTER); // Centrado
+        lblTitulo.setFont(new Font("Arial", Font.BOLD, 36));
+        lblTitulo.setBorder(BorderFactory.createEmptyBorder(30, 0, 20, 0));
+        lblTitulo.setHorizontalAlignment(SwingConstants.CENTER);
         
         add(lblTitulo, BorderLayout.NORTH);
 
         // Panel para introducir los datos del pedido
         JPanel panelDatos = new JPanel();
-        panelDatos.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10)); // Espacio más grande entre componentes
+        panelDatos.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
 
         txtMedicamento = new JTextField(10);
         txtViaAdmin = new JTextField(10);
@@ -44,23 +44,26 @@ public class HojaDePedidos extends JFrame {
         String[] columnNames = {"Medicamento", "Vía de Administración", "Cantidad"};
         modeloTabla = new DefaultTableModel(columnNames, 0);
         tablaPedidos = new JTable(modeloTabla);
-        
-        // Centrar la tabla con un panel adicional
+
+        // Panel de la tabla
         JPanel panelTabla = new JPanel();
         panelTabla.setLayout(new BorderLayout());
-        panelTabla.setBorder(BorderFactory.createEmptyBorder(50, 50, 10, 50)); // Margen adicional
+        panelTabla.setBorder(BorderFactory.createEmptyBorder(50, 50, 10, 50));
         panelTabla.add(new JScrollPane(tablaPedidos), BorderLayout.CENTER);
+
+        // Botón "Descargar Pedidos"
+        JButton btnDescargar = new JButton("Descargar Pedidos");
+        panelTabla.add(btnDescargar, BorderLayout.SOUTH);
 
         // Agregar componentes a la ventana
         add(panelDatos, BorderLayout.CENTER);
-        add(panelTabla, BorderLayout.SOUTH); // Cambia el orden si es necesario
+        add(panelTabla, BorderLayout.SOUTH);
 
-        // Acción del botón
-        btnAgregar.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                agregarPedido();
-            }
-        });
+        // Acción del botón "Agregar Pedido"
+        btnAgregar.addActionListener(e -> agregarPedido());
+
+        // Acción del botón "Descargar Pedidos"
+        btnDescargar.addActionListener(e -> descargarPedidos());
     }
 
     private void agregarPedido() {
@@ -84,13 +87,23 @@ public class HojaDePedidos extends JFrame {
         }
     }
 
+    private void descargarPedidos() {
+        try (FileWriter writer = new FileWriter("pedidos.txt")) {
+            for (int i = 0; i < modeloTabla.getRowCount(); i++) {
+                writer.write(modeloTabla.getValueAt(i, 0) + ", " +
+                             modeloTabla.getValueAt(i, 1) + ", " +
+                             modeloTabla.getValueAt(i, 2) + "\n");
+            }
+            JOptionPane.showMessageDialog(this, "Pedidos descargados exitosamente.");
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Error al guardar los pedidos.");
+        }
+    }
+
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new HojaDePedidos().setVisible(true);
-        });
+        SwingUtilities.invokeLater(() -> new HojaDePedidos().setVisible(true));
     }
 }
-
 
 
 
